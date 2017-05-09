@@ -19,14 +19,20 @@ public class MultiDownloadManager {
     private OnProgressListener mOnProgressListener;
     private long mContentLength;
 
-    public MultiDownloadManager(String url, int threadCount, File savedFile) throws IOException {
+    public MultiDownloadManager(String url, int threadCount, File saved) throws IOException {
         if (url == null || url.equals("")) throw new NullPointerException("url must not be null");
         if (threadCount < 1) throw new IllegalArgumentException("threadCount must be > 0");
-        if (savedFile == null || savedFile.isDirectory())
-            throw new IllegalArgumentException("savedFile must be a file, not be a directory");
+        if (saved == null) throw new NullPointerException("savedFile must not be null");
+        String fileName = url.substring(url.lastIndexOf("/"), url.length());
+        if (fileName.length() == 0) throw new IllegalArgumentException("Unable to get file name from url");
+        if (saved.isDirectory()){
+            saved.mkdirs();
+            this.savedFile = new File(saved, fileName);
+        }else{
+            this.savedFile = saved;
+        }
         this.url = url;
         this.threadCount = threadCount;
-        this.savedFile = savedFile;
         init();
     }
 
@@ -72,12 +78,13 @@ public class MultiDownloadManager {
 
     public static void main(String[] args) throws IOException {
         String url = "https://dl.google.com/dl/android/studio/ide-zips/2.4.0.6/android-studio-ide-171.3934896-mac.zip";
-        String filePath = "/Users/Risky/Downloads/AndroidStudio.zip";
+        String filePath = "/Users/Risky/Downloads/";
         final MultiDownloadManager manager = new MultiDownloadManager(url, 3, filePath);
         manager.setOnProgressListener(new OnProgressListener() {
             private long currentLength;
             private int lastProgress;
 
+            // 添加synchronized为了进度计算更准确, 但是会稍微影响下载速度
             public synchronized void onUpdate(int progress) {
                 currentLength += progress;
                 int pro = (int) (currentLength * 100f / manager.getContentLength());
