@@ -29,7 +29,12 @@ public class HttpManager {
         return mClient.newCall(request).execute();
     }
 
-    public static Response startRequest(Request request) throws IOException {
-        return getInstance()._startRequest(request);
+    public static Response startRequest(Request request){
+        try {
+            return getInstance()._startRequest(request);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

@@ -19,7 +19,7 @@ public class MultiDownloadManager {
     private OnProgressListener mOnProgressListener;
     private long mContentLength;
 
-    public MultiDownloadManager(String url, int threadCount, File saved) throws IOException {
+    public MultiDownloadManager(String url, int threadCount, File saved){
         if (url == null || url.equals("")) throw new NullPointerException("url must not be null");
         if (threadCount < 1) throw new IllegalArgumentException("threadCount must be > 0");
         if (saved == null) throw new NullPointerException("savedFile must not be null");
@@ -36,19 +36,27 @@ public class MultiDownloadManager {
         init();
     }
 
-    public MultiDownloadManager(String url, int threadCount, String filePath) throws IOException {
+    public MultiDownloadManager(String url, int threadCount, String filePath){
         this(url, threadCount, new File(filePath));
     }
 
-    private void init() throws IOException {
+    private void init() {
         if (!savedFile.exists()) {
-            savedFile.createNewFile();
+            try {
+                savedFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    public void startDownload() throws IOException {
+    public void startDownload() {
         Request request = new Request.Builder().url(url).build();
         Response response = HttpManager.startRequest(request);
+        if (response == null) {
+            return;
+        }
         mContentLength = response.body().contentLength();
         response.body().close();
         long start = 0;
@@ -76,7 +84,7 @@ public class MultiDownloadManager {
         mOnProgressListener = onProgressListener;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args){
         String url = "https://dl.google.com/dl/android/studio/ide-zips/2.4.0.6/android-studio-ide-171.3934896-mac.zip";
         String filePath = "/Users/Risky/Downloads/";
         final MultiDownloadManager manager = new MultiDownloadManager(url, 3, filePath);
