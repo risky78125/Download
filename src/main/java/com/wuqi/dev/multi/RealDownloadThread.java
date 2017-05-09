@@ -40,6 +40,7 @@ public class RealDownloadThread implements Runnable {
             response = HttpManager.startRequest(request);
             InputStream is = response.body().byteStream();
             access = new RandomAccessFile(file, "rw");
+            // 从start的位置开始写入数据
             access.seek(start);
             byte [] bytes = new byte[1024];
             int length = -1;

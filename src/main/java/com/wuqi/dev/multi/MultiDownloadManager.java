@@ -60,12 +60,15 @@ public class MultiDownloadManager {
         mContentLength = response.body().contentLength();
         response.body().close();
         long start = 0;
+        // 平均分割文件的大小
         long fragment = mContentLength / threadCount;
         for (int i = 0; i < threadCount; i++) {
+            // 计算每个部分的开始和结束位置
             long end;
             if (i < threadCount - 1) {
                 end = fragment * (i + 1);
             } else {
+                // 最后的部分的结束位置为总长度, 防止做除法取整, 文件下载不完全
                 end = mContentLength;
             }
 //            System.out.println("start:" + start + ", end:" + end + ", 差为: " + (end - start));
